@@ -75,7 +75,9 @@ class ViewController: NSViewController {
     }
     
     func DecodeMsg(exponent: Int) {
-        
+        for index in 0..<ciphered_bytes.count {
+            msg_bytes.append(UInt8(fast_exp(a: ciphered_bytes[index], z: d, n: r)))
+        }
     }
     
     override func viewDidLoad() {
@@ -145,8 +147,13 @@ class ViewController: NSViewController {
             try! data.write(to: URL(fileURLWithPath: filePath + ".ciphered"))
         case 1:
             DecodeMsg(exponent: d)
-            
-            
+            msg.string = ""
+            for byte in msg_bytes {
+                msg.string.append(String(byte) + " ")
+            }
+            let pointer = UnsafeBufferPointer(start:msg_bytes, count:msg_bytes.count)
+            let data = Data(buffer: pointer)
+            try! data.write(to: URL(fileURLWithPath: filePath + ".decoded"))
         default:
             break
         }
@@ -186,9 +193,9 @@ class ViewController: NSViewController {
     }
     
     @IBAction func OpenCipheredFile(_ sender: Any) {
-        let cipherPath = browseFile()
+        filePath = browseFile()
         
-        if let data = NSData(contentsOfFile: cipherPath) {
+        if let data = NSData(contentsOfFile: filePath) {
             var buffer = [Int](repeating: 0, count: data.length / 8)
             data.getBytes(&buffer, length: data.length)
             ciphered_bytes = buffer
