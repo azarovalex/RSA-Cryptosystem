@@ -39,6 +39,7 @@ func isPrime(_ number: Int) -> Bool {
     return number > 1 && !(2..<number).contains { number % $0 == 0 }
 }
 
+
 class ViewController: NSViewController {
 
     @IBOutlet weak var p_textbox: NSTextField!
@@ -62,6 +63,17 @@ class ViewController: NSViewController {
     var r = 0
     var euler = 0
     
+    func EncodeMsg(exponent: Int) {
+        ciphered_bytes = msg_bytes.map { Int($0) }
+        for index in 0..<ciphered_bytes.count {
+            ciphered_bytes[index] = fast_exp(a: ciphered_bytes[index], z: e, n: r)
+        }
+        cipher.string = ""
+        for byte in ciphered_bytes {
+            cipher.string.append(String(byte) + " ")
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
@@ -82,16 +94,22 @@ class ViewController: NSViewController {
     }
     
     @IBAction func Encode(_ sender: Any) {
-        guard Int(p_textbox.stringValue) != nil && isPrime(Int(p_textbox.stringValue)!) else {
+        guard msg.string.lengthOfBytes(using: .ascii) > 0 else {
+            dialogError(question: "Error!", text: "Please, open a file to encipher.")
+            return
+        }
+        guard Int(p_textbox.stringValue) != nil && Int(p_textbox.stringValue) != nil else {
             dialogError(question: "Error!", text: "P is not a prime number.")
             return
         }
         p = Int(p_textbox.stringValue)!
+        
         guard Int(q_textbox.stringValue) != nil && isPrime(Int(q_textbox.stringValue)!) else {
             dialogError(question: "Error!", text: "Q is not a prime number.")
             return
         }
         q = Int(q_textbox.stringValue)!
+        
         guard Int(d_textbox.stringValue) != nil else {
             dialogError(question: "Error!", text: "D is not a number.")
             return
@@ -104,10 +122,30 @@ class ViewController: NSViewController {
         r_label.stringValue = "r = \(r)"
         e = inverse(n: d, modulus: euler)
         e_label.stringValue = "e = \(e)"
+        EncodeMsg(exponent: e)
+        let pointer = UnsafeBufferPointer(start:ciphered_bytes, count:ciphered_bytes.count)
+        let data = Data(buffer:pointer)
+        try! data.write(to: URL(fileURLWithPath: filePath + ".ciphered"))
+    }
+    
+    // a^z mod n
+    func fast_exp(a: Int ,z: Int, n: Int) -> Int {
+        var a1 = a
+        var z1 = z
+        var x = 1
+        while (z1 != 0) {
+            while ((z1 % 2) == 0) {
+                z1 = z1 / 2
+                a1 = (a1*a1) % n
+            }
+        z1 = z1 - 1
+        x = (x * a1) % n
+        }
+        return x
     }
     
     @IBAction func OpenFile(_ sender: Any) {
-        let filePath = browseFile()
+        filePath = browseFile()
         
         // Represent the file as a sequence of numbers
         if let data = NSData(contentsOfFile: filePath) {
@@ -120,6 +158,9 @@ class ViewController: NSViewController {
         for byte in msg_bytes {
             msg.string.append(String(byte) + " ")
         }
+    }
+    @IBAction func OpenCipheredFile(_ sender: Any) {
+        
     }
     
 }
