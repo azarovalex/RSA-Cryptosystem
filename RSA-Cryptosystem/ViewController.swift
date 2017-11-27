@@ -74,6 +74,10 @@ class ViewController: NSViewController {
         }
     }
     
+    func DecodeMsg(exponent: Int) {
+        
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
@@ -93,11 +97,22 @@ class ViewController: NSViewController {
         return x0
     }
     
-    @IBAction func Encode(_ sender: Any) {
-        guard msg.string.lengthOfBytes(using: .ascii) > 0 else {
-            dialogError(question: "Error!", text: "Please, open a file to encipher.")
+    @IBAction func Encode(_ sender: NSButton) {
+        switch sender.tag {
+        case 0:
+            guard msg.string.lengthOfBytes(using: .ascii) > 0 else {
+                dialogError(question: "Error!", text: "Please, open a file to encipher.")
+                return
+            }
+        case 1:
+            guard cipher.string.lengthOfBytes(using: .ascii) > 0 else {
+                dialogError(question: "Error!", text: "Please, open a file to decipher.")
+                return
+            }
+        default:
             return
         }
+        
         guard Int(p_textbox.stringValue) != nil && Int(p_textbox.stringValue) != nil else {
             dialogError(question: "Error!", text: "P is not a prime number.")
             return
@@ -122,10 +137,20 @@ class ViewController: NSViewController {
         r_label.stringValue = "r = \(r)"
         e = inverse(n: d, modulus: euler)
         e_label.stringValue = "e = \(e)"
-        EncodeMsg(exponent: e)
-        let pointer = UnsafeBufferPointer(start:ciphered_bytes, count:ciphered_bytes.count)
-        let data = Data(buffer:pointer)
-        try! data.write(to: URL(fileURLWithPath: filePath + ".ciphered"))
+        switch sender.tag {
+        case 0:
+            EncodeMsg(exponent: e)
+            let pointer = UnsafeBufferPointer(start:ciphered_bytes, count:ciphered_bytes.count)
+            let data = Data(buffer:pointer)
+            try! data.write(to: URL(fileURLWithPath: filePath + ".ciphered"))
+        case 1:
+            DecodeMsg(exponent: d)
+            
+            
+        default:
+            break
+        }
+        
     }
     
     // a^z mod n
@@ -159,8 +184,20 @@ class ViewController: NSViewController {
             msg.string.append(String(byte) + " ")
         }
     }
+    
     @IBAction func OpenCipheredFile(_ sender: Any) {
+        let cipherPath = browseFile()
         
+        if let data = NSData(contentsOfFile: cipherPath) {
+            var buffer = [Int](repeating: 0, count: data.length / 8)
+            data.getBytes(&buffer, length: data.length)
+            ciphered_bytes = buffer
+        }
+        
+        cipher.string = ""
+        for byte in ciphered_bytes {
+            cipher.string.append(String(byte) + " ")
+        }
     }
     
 }
