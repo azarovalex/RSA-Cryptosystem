@@ -10,18 +10,22 @@ import Cocoa
 
 class ViewController: NSViewController {
 
+    @IBOutlet weak var p: NSTextField!
+    @IBOutlet weak var q: NSTextField!
+    @IBOutlet weak var d: NSTextField!
+    @IBOutlet weak var r_label: NSTextField!
+    @IBOutlet weak var euler_label: NSTextField!
+    @IBOutlet weak var e_label: NSTextField!
+    @IBOutlet weak var msg: NSScrollView!
+    @IBOutlet weak var cipher: NSScrollView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
     }
-
-    override var representedObject: Any? {
-        didSet {
-        // Update the view, if already loaded.
-        }
+    
+    @IBAction func encode(_ sender: Any) {
+        r_label.stringValue = "r = \(Int(p.stringValue)! * Int(q.stringValue)!)"
+        
     }
-
-
 }
 
