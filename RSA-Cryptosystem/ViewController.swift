@@ -17,13 +17,26 @@ func dialogError(question: String, text: String) {
     alert.runModal()
 }
 
+func gcd(_ m: Int, _ n: Int) -> Int {
+    var a = 0
+    var b = max(m, n)
+    var r = min(m, n)
+    
+    while r != 0 {
+        a = b
+        b = r
+        r = a % b
+    }
+    return b
+}
+
 func browseFile() -> String {
     let dialog = NSOpenPanel();
-    dialog.title                   = "Choose a file";
-    dialog.showsResizeIndicator    = true;
-    dialog.showsHiddenFiles        = false;
-    dialog.canCreateDirectories    = true;
-    dialog.allowsMultipleSelection = false;
+    dialog.title                   = "Choose a file"
+    dialog.showsResizeIndicator    = true
+    dialog.showsHiddenFiles        = false
+    dialog.canCreateDirectories    = true
+    dialog.allowsMultipleSelection = false
     
     if (dialog.runModal() == NSApplication.ModalResponse.OK) {
         let result = dialog.url
@@ -75,6 +88,7 @@ class ViewController: NSViewController {
     }
     
     func DecodeMsg(exponent: Int) {
+        msg_bytes.removeAll()
         for index in 0..<ciphered_bytes.count {
             msg_bytes.append(UInt8(fast_exp(a: ciphered_bytes[index], z: d, n: r)))
         }
@@ -121,6 +135,11 @@ class ViewController: NSViewController {
         }
         p = Int(p_textbox.stringValue)!
         
+        guard isPrime(p) else {
+            dialogError(question: "Error!", text: "P is not a prime number.")
+            return
+        }
+        
         guard Int(q_textbox.stringValue) != nil && isPrime(Int(q_textbox.stringValue)!) else {
             dialogError(question: "Error!", text: "Q is not a prime number.")
             return
@@ -137,6 +156,25 @@ class ViewController: NSViewController {
         euler_label.stringValue = "Euler(r) = \(euler)"
         r = p * q
         r_label.stringValue = "r = \(r)"
+        guard r > 254 else {
+            dialogError(question: "Error!", text: "Your primes are very small. r should be at least 255.")
+            return
+        }
+
+        // Check if d is co-prime with euler func
+        guard gcd(d, euler) == 1 else {
+            dialogError(question: "Error!", text: "D isn't correct!")
+            return
+        }
+
+
+//        for index in 2...euler {
+//            if d % index == 0 && euler % index == 0 {
+//                dialogError(question: "Error!", text: "D isn't correct!")
+//                return
+//            }
+//        }
+        
         e = inverse(n: d, modulus: euler)
         e_label.stringValue = "e = \(e)"
         switch sender.tag {
