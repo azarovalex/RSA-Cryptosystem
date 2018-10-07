@@ -47,11 +47,14 @@ func browseFile() -> String {
     } else { return "" }
     return ""
 }
-
+/*
 func isPrime(_ number: Int) -> Bool {
     return number > 1 && !(2..<number).contains { number % $0 == 0 }
 }
-
+*/
+extension Int {
+    var isPrime: Bool { return self > 1 && !(2 ..< self).contains { self % $0 == 0 } }
+}
 
 class ViewController: NSViewController {
 
@@ -129,18 +132,14 @@ class ViewController: NSViewController {
             return
         }
         
-        guard Int(p_textbox.stringValue) != nil && Int(p_textbox.stringValue) != nil else {
+        guard Int(p_textbox.stringValue) != nil && (Int(p_textbox.stringValue)!.isPrime) else {
             dialogError(question: "Error!", text: "P is not a prime number.")
             return
         }
         p = Int(p_textbox.stringValue)!
+    
         
-        guard isPrime(p) else {
-            dialogError(question: "Error!", text: "P is not a prime number.")
-            return
-        }
-        
-        guard Int(q_textbox.stringValue) != nil && isPrime(Int(q_textbox.stringValue)!) else {
+        guard Int(q_textbox.stringValue) != nil && (Int(q_textbox.stringValue)!.isPrime) else {
             dialogError(question: "Error!", text: "Q is not a prime number.")
             return
         }
